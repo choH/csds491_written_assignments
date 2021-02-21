@@ -1,3 +1,8 @@
+# LaTeX
+article*
+!article.pdf
+!article.tex
+
 # Ignored folders
 test.py
 pg*
