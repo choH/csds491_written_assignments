@@ -80,9 +80,65 @@
 % Exploration: The terms discrete and continuous refer to the variables in the model.  See the rubric for the grading criteria. Try to make your inference problems simple models of real-world situations, rather than just numerical examples.
 
 
-\section*{Q1}
+\section*{Q1. Conditional Independence}
 
-\section*{Q2}
+\subsection*{1.1.}
+
+\begin{align*}
+    p(a,b) &= \sum\limits_c \sum\limits_d \sum\limits_e p(a, b, c, d, e) \\
+    &= \sum\limits_c  p(c \mid a, b) p(a)p(b) \cdot \sum\limits_d p(d \mid c) \cdot \sum\limits_e p(e \mid c) \\
+    &\text{Known that} \ \sum\limits_{x} p(x \mid pa(x)) = 1 \\
+    &= p(a)p(b)
+\end{align*}
+
+Thus, $a \perp b \mid \emptyset$.
+
+\subsection*{1.2.}
+
+For $a \perp b \mid e$ we must have $p(a, b \mid e) = p(a \mid e) p(b \mid e)$. Which implies $p(a \mid b, e) = p(a \mid e)$ since:
+
+\begin{align*}
+    p(a \mid b) &= \frac{p(a, b)}{p(b)} \\
+    p(a \mid b, e) &= \frac{p(a, b \mid e)}{p(b \mid e)} \\
+    &= \frac{p(a \mid e) p(b \mid e)}{p(b \mid e)} \\
+    &= p(a \mid e)
+\end{align*}
+
+Known that $a \perp b \mid \emptyset$, now to calculate $p(a \mid b, e)$ and $p(a \mid e)$ to see if they are equal:
+
+\begin{align*}
+    p(a \mid b,e) &= \frac{p(a,b,e)}{p(b,e)} = \frac{\sum_c p(a,b,c,e)}{\sum_a\sum_c p(a,b,c,e)}\\
+    &= \frac{\sum_c p(e \mid c)p(a,b,c)}{\sum_a\sum_c p(e \mid c)p(a,b,c)}\\
+    &= \frac{\sum_c p(e \mid c)p(a,b,c)}{\sum_a\sum_c p(e \mid c)p(c \mid a, b) p(a, b)}\\
+    &= \frac{\sum_c p(e \mid c)p(a,b,c)}{\sum_a\sum_c p(e \mid c)p(c \mid a, b) p(a) p(b)}\\
+    &= \frac{\sum_c p(e \mid c)p(a,b,c)}{\sum_c p(e \mid c)p(b, c)}
+\end{align*}
+
+\begin{align*}
+    p(a \mid e) &= \frac{p(a,e)}{p(e)} = \frac{\sum_c\sum_b p(a,b,c,e)}{\sum_c p(e \mid c)p(c)}\\
+    &= \frac{\sum_c p(e \mid c) \sum_b p(a,b,c)}{\sum_c p(e \mid c)p(c)}\\
+    &= \frac{\sum_c p(e \mid c) p(a,c)}{\sum_c p(e \mid c)p(c)}
+\end{align*}
+
+
+Thus, it is possible that $p(a \mid b,e) \neq p(a \mid e)$ unless we may confirm that $p(b) = 1$.
+
+
+\section*{Q2. Conditional Independence and Causality}
+
+The conditional independence assumption this model made is $b \perp c \mid a$ as $p(b, c \mid a) = p(b \mid a) p(c \mid a)$; and joint distribution of this model is therefore $p(a, b, c) = p(b\mid  a)p(c\mid a)p(a)$.
+
+However, the same joint distribution $p(a, b, c)$ can also be modeled differently:
+
+\begin{align*}
+    p(a, b, c) &= p(a \mid b, c)p(b \mid c)p(c) \\
+    &= p(b \mid a, c)p(a \mid c)p(c) \\
+    &= p(c \mid a, b)p(a \mid b)p(b) \\
+    &= \dots
+\end{align*}
+
+Thus, the condition of the purposed graph does not necessarily hold.
+
 
 \section*{Q3. Model Complexity, Free Parameters, and Simplifying Assumptions}
 
