@@ -6,6 +6,7 @@ article*
 # Ignored folders
 test.py
 pg*
+**/Ref./**
 
 # macOS
 **/.DS_Store
