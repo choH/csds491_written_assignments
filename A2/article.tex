@@ -407,7 +407,113 @@ We may tell the leading potential cause of the problem might be \ilc{Fuel = empt
 
 We observed that the probability of fuel being empty has dramatically decresed, and now the leading potential cause for the problem become \ilc{Battery = bad} -- and that's the true cause of the problem.
 
-\section*{Exploration}
+\section*{Exploration: Boltzmann machine, and it's representation power against sigmoid belief network.}
+
+I decided to take a slithly eccentric topic for this exploration as I don't really feel like designing a belief network, assigning some made up probablities, and calculate some conditional probablities. Since I feel like this will be very close to the pratice in \textbf{Question 5}, and with the help of \ilc{pgmpy}, a made up belief network by myself might be terrible to calculate by hand, but certainly not so hard to a computer; and it will be hard to show the effect of an optimization algorithm in a small scale belief network.
+
+However, I have spent quite amount of time in \textbf{Question 4} by exploring the representation power between the noisy-OR-based network and a sigmoid-based network; and the literatures I consulted dicussed some very interesting concepts regarding the \textit{Boltzmann Machine}, and its representation power in relationship to some more common belief networks -- like the sigmoid belief network. So I'd like to take this oppotunity to give a brief introduction of Boltzmann machine: what it is, how it work in the context of probability inference, and how it is applied to modern neural network learning. Then I will walk through mathematical examples analysing the representation power between a Boltzmann machine and a sigmoid belief network in the context of 2-, 3-, and 4-unit. Althought the networks presented here are not ``more complex'' in terms of number of variables comparing to other questions in this assignment, but it is certainly more involved as it is an analytical review of different learning model instead of calculating definitive answers; and for this I hope the grader won't consider this to be too shallow.\newline
+
+\paragraph{A quick introduction of Boltzmann machine.}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\linewidth]{{fig/bm}.png}
+    \caption*{Structure of Boltzmann machine}
+\end{figure}
+
+A Boltzmann machine is a type of stochastic recurrent neural network that is known to be widely applied to binary model inference problems. By inspecting the above diagram, it is clear that the Boltzmann machine is different to the neurol network (or deep belief network, to be precise) as it:
+
+\begin{itemize}
+    \item Has no output layer and it is undirected.
+    \item Has connections between input (in this case, the three blue) nodes.
+\end{itemize}
+
+The second property can be even more elaborate to the fact that every visible nodes within a Boltzmann machine can connect to each other, but this is merely a structure difference -- a restriced Boltzmann machine will not have this property, but still has no output nodes (and this will be a layer/block within deep neural network). The Boltzmann machine is an energy based system, where as each visible node will take a binary input, and by calculate the total energy of the system, we may infer on probablity of a particular visible node, or join distribution of couple visible nodes.
+
+The energy of the total system is denoted as $E$, where:
+
+\begin{equation*}
+    -E(v, h) = \sum_{i \in v} v_i b_i + \sum_{k \in h} h_k b_k + \sum_{i \leq j} v_i v_j w_{ij} + \sum_{i, k} v_i h_k w_{ik} + \sum_{k \leq l} h_k h_l w_{kl}
+\end{equation*}
+
+\begin{itemize}
+    \item $v$: visible nodes.
+    \item $h$: hidden nodes.
+    \item $b_i$: bias of node with index $i$, wheather this node is $v_i$ or $h_i$ is implied through mutiplication. i.e., $b_i$ in $h_i b_i$ is the bias of a hidden node $h_i$
+    \item $w_{ij}$: weight between nodes of index $i$ and $j$, wheather the nodes are visible or not (or one visible one hidden) is implied through mutiplication.
+\end{itemize}
+
+Since the energy formula is quite long, it might be hard to digest. But essentially, take an edge of the proposed network (say it is $e$) and mutiply it with two of its verticies (say it is $e_A, e_B$), keep the result and sum it up by doing this to every edges as $\sum\limits_{e \in E(G)} e e_A e_B$. Here's an example made by \href{https://www.youtube.com/watch?v=5jaBneYd5Ig}{Colin Reckons} (note we omitted connection between visible nodes for simplicity):
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3\linewidth]{{fig/bm_example}.png}
+    \caption*{An example Boltzmann machine}
+\end{figure}
+
+Say we have $-E(<v_1, v_2, h_1, h_2>)$, the total energy of the network is:
+
+\begin{align*}
+    -E(<v_1, v_2, h_1, h_2>) &= w_{v_1 h_1}(v_1 \cdot h_1) - w_{h_1 h_2}(h_1 \cdot h_2) + w_{h_2 v_2}(h_2 \cdot v_2) =  2\\
+    -E(<1, 1, 1, 1>) &= 2(1 \cdot 1) - 1(1 \cdot 1) + 1(1 \cdot 1) =  2\\
+    -E(<1, 1, 1, 0>) &= 2(1 \cdot 1) + 1(1 \cdot 0) + 1(0 \cdot 1) = 2 \\
+    &\dots
+\end{align*}
+
+We denote this total energy as $-E(v, h)$ to represent it is the total energy among all visible and hidden nodes; and we may infer the probablity of $p(v, h)$ and $p(v)$ as:
+
+\begin{align*}
+    p(v, h) &= \frac{e^{-E(v, h)}}{\sum_{u, g} e^{-E(u, g)}} \\
+    p(v) &= \frac{\sum_h e^{-E(v, h)}}{\sum_{u, g} e^{-E(u, g)}}
+\end{align*}
+
+Where $u, g$ represents all possible combination of vissible and hidden nodes. In this example, we have $<v_1, h_2, h_1, h_2>$ to be a 4-bit binary vector, so there can be 16 possible combinations. Thus, we may proceed and infer the possible of all conditions as:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\linewidth]{{fig/bm_result}.png}
+    \caption*{Probablity inferences of the example Boltzmann machine}
+\end{figure}
+
+Note this \textcolor{red}{39.70} is simply the sum of all $e^{-E}$, and each $p(v, h)$ are the $e^{-E}$ on its row divided by this 39.70. And the four $p(v)$ are sum of all $p(v, h)$ with the same $v$ inputs.\newline
+
+\paragraph{Representation power on 2- and 3-unit binary input.}
+Now we want to show that \textbf{ANY} distribution of a two-unit binary input (with excaption of having extreme output like $0, 1$, which requires a sum-of-weighted-inputs of $\pm infty$) can be represented by the Boltzmann machine and also a sigmoid feedforward network. We start with the sigmoid feedforward network.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\linewidth]{{fig/2_unit}.png}
+    \caption*{A Sigmoid feedforward network that can represent any distribution of a two-unit binary input.}
+\end{figure}
+
+It is easy to tell that this network can represent any distribution of a two-unit binary input, as we have $P(Y \mid X=1)$ and all possible $P(X)$s, all we have to do is to make it proportional to the sigmoid transformation so that $\sigma(z)$ can be the desired probablity output (where $z$ is the sum of weighted inputs). \newline
+
+Now to represent the same distribution with a Boltzmann machine. We have the energy of $<0, 0>$ to be always zero, so the $p(<0, 0>)$ must relay on the its proportion to the sum of all energy. For $<1, 0>$ and $<0, 1>$, we may simply set the desired probablity distribution to be proportional to bias of each $1$ node, as the total energy in such state is always $e^{-B_x}$ (assuming $x$ is the node with $1$). Last, for the state $<1, 1>$, we may set the desired probablity to be proportional to the weight $w_{xy}$. As this Boltzmann machine can represent the distributions all four states of a 2 unit binary input with the same bias and weights, it can also represent any distribution of a two-unit binary input just like the sigmoid feedforward network.
+
+This inference can be further elaborated to three-unit binary input as showned in \href{http://www.cs.toronto.edu/~bonner/courses/2016s/csc321/readings/Connectionist%20learning%20of%20belief%20networks.pdf}{R.M. Neal, Connectionist learning of belief networks, Artificial Intelligence 56 (1992) 71–113.} by doing what we did first for the first to node, and connect to third node with weights of its conditional probablity to the first two nodes. However, it can only be shown a distribution that is representable in sigmoid feedforward network is equally representable in a Boltzmann machine and vice versa. This is not to say that any \textbf{ANY} (non-extreme, as for no $0, 1$ probablity outputs) distribution of a three-unit binary input can be represent in a sigmoid feedforward network / Boltzmann machine, as in \textbf{Question 4.4.} we have shown a three-unit system with noisy-OR distribution can't be represented by a sigmoid feedforward network.
+
+\paragraph{Representation power on 4-unit binary input.}
+
+So far, although we have demonstrated that there are (non-extreme) distribution of 3-unit binary input that cannot be represented by a sigmoid network or a Boltzmann machine, the two still got the same representation power. But this is not the case when we raise to 4-unit binay input, as each of them got some distribution the other can't represent. Due to time and space constraint, here's a Boltzmann machine that can't be represent by a sigmoid netwrok, designed by R.M. Neal:
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3\linewidth]{{fig/bm_no_sig}.png}
+    \caption*{A Boltzmann machine that is untranslatable to sigmoid belief network}
+\end{figure}
+
+
+Since the Boltzmann machine is symmetric, we mays start with any node and call this unit 4. For the weights that going into the second-last unit (unit 3 ), due to the symmetry shape, the two weights must be equal (we denote them as $w$, and let the bias of unit 3 to be $b$). Now in the case of unit 3 and unit 4 have value of 1s, and unit 1 and unit 2 have zero or one or two ones among them, we must have the following relationship (LHS Boltzmann and RHS sigmoid):
+
+\begin{align*}
+    e^{1} &= \propto e^b \frac{\sigma(1)}{\sigma{0}} &\text{zero 1 in unit 1\&2} \\
+    e^{2} &= \propto e^{b + w} \frac{\sigma(2)}{\sigma{1}} &\text{one 1 in unit 1\&2} \\
+    e^{3} &= \propto e^{b + 2w} \frac{\sigma(3)}{\sigma{2}} &\text{two 1s in unit 1\&2}
+\end{align*}
+
+Which is clear that this is not a solvable linear system, and therefore this distribution cannot be translate to a sigmoid belief network.
+
 
 
 
