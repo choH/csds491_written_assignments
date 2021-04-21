@@ -56,7 +56,7 @@ reduced_label_df= pd.concat([reduced_df , pd.DataFrame(label)] , axis = 1)
 
 
 
-plt.figure(figsize = (10, 10))
+plt.figure()
 sb.scatterplot(data = reduced_label_df, x = 'PC1', y = 'PC2', hue = label_column_name, s = 50, legend='full', palette= 'icefire')
 
 # 3.3.
