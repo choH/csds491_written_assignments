@@ -137,7 +137,7 @@ I don't know if we are expected to show the proof, but here's a trick that can d
 \end{align*}
 
 
-Similarily, we may find out $\overline{\Sigma}$ as (note that $cov(x, y) = cov(y, x)$ for scalar):
+Similarily, we may find out $\overline{\Sigma}$ as (note that $cov(x, y) = cov(y, x)$):
 
 
 \begin{align*}
@@ -149,10 +149,10 @@ Similarily, we may find out $\overline{\Sigma}$ as (note that $cov(x, y) = cov(y
 \end{align*}
 
 
-As know from \textbf{Exercise 2.1} that $p(y) = \mathcal N(\mu_x+\mu_z,\Sigma_x+\Sigma_z)$ and $p(x) = \mathcal N(\mu_x, \Sigma_x)$, we have $p(y \mid x) = \mathcal N(\overline{\mu}, \overline{\mu})$, where:
+As know from \textbf{Exercise 2.1} that $p(y) = \mathcal N(\mu_x+\mu_z,\Sigma_x+\Sigma_z)$ and $p(x) = \mathcal N(\mu_x, \Sigma_x)$, we have $p(y \mid x) = \mathcal N(\overline{\mu}, \overline{\Sigma})$, where:
 
 \begin{align*}
-    \overline{\mu} &= \mu_y + \Sigma_{yx} \Sigma_{xx}^{-1} (x - \mu_x) = \mu_x \mu_z + \Sigma_{yx} \Sigma_{xx}^{-1} (x - \mu_x) \\
+    \overline{\mu} &= \mu_y + \Sigma_{yx} \Sigma_{xx}^{-1} (x - \mu_x) = \mu_x + \mu_z + \Sigma_{yx} \Sigma_{xx}^{-1} (x - \mu_x) \\
     \overline{\Sigma} &=  \Sigma_{yy} - \Sigma_{yx} \Sigma_{xx}^{-1} \Sigma_{xy} = \Sigma_{x} + \Sigma_{z} -\Sigma_{yx} \Sigma_{xx}^{-1} \Sigma_{xy}
 \end{align*}
 
