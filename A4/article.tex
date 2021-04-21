@@ -75,6 +75,57 @@
 \maketitle
 
 \section*{E1. Multivariate Gaussians}
+
+Please refer to \ilc{A4/code/e1.py} for the code implmentations of below plots.
+
+\subsection*{1.1.}
+
+For 2D multivariate normal we have $\Sigma = \qbm{\sigma_{xx} & \sigma_{xy} \\ \sigma_{yx} & \sigma_{yy}}$. Note:
+
+\begin{itemize}
+    \item For $x$ and $y$ to be uncorrelated, we have $\sigma_{xy} = \sigma_{yx} = 0$. For demo, we have $\mathcal N(\mu = \qbm{0 \\ 0}, \Sigma = \qbm{1 & 0 \\ 0 & 1})$.
+    \item For $x$ and $y$ to be uncorrelated, we have $\sigma_{xy} = \sigma_{yx} > 0$. For demo, we have $\mathcal N(\mu = \qbm{0.5 \\ 0.5}, \Sigma = \qbm{1 & 0.9 \\ 0.9 & 1})$.
+    \item For $x$ and $y$ to be anti-correlated, we have $\sigma_{xy} = \sigma_{yx} < 0$. For demo, we have $\mathcal N(\mu = \qbm{0.7 \\ 0.7}, \Sigma = \qbm{1 & -0.9 \\ -0.9 & 1})$.
+\end{itemize}
+
+\begin{figure}[H]
+\minipage{0.3\textwidth}
+  \includegraphics[width=\linewidth]{{fig/e1.1_1}.png}
+  \caption*{Uncorrelated}
+\endminipage\hfill
+\minipage{0.3\textwidth}
+    \includegraphics[width=\linewidth]{{fig/e1.1_2}.png}
+    \caption*{Correlated}
+\endminipage\hfill
+\minipage{0.3\textwidth}
+    \includegraphics[width=\linewidth]{{fig/e1.1_3}.png}
+    \caption*{Anti-correlated}
+\endminipage
+\end{figure}
+
+
+\subsection*{1.2.}
+
+Assuming the same $\mu$ and $\Sigma$ setup in \textbf{Exercise 1.1}, we have the $1-, 2-, 3-\sigma$ countour plots being (note eigenvectors are scaled \ilc{4x} for visual purposes):
+
+
+\begin{figure}[H]
+\minipage{0.3\textwidth}
+  \includegraphics[width=\linewidth]{{fig/e1.2_1}.png}
+  \caption*{Uncorrelated}
+\endminipage\hfill
+\minipage{0.3\textwidth}
+    \includegraphics[width=\linewidth]{{fig/e1.2_2}.png}
+    \caption*{Correlated}
+\endminipage\hfill
+\minipage{0.3\textwidth}
+    \includegraphics[width=\linewidth]{{fig/e1.2_3}.png}
+    \caption*{Anti-correlated}
+\endminipage
+\end{figure}
+
+
+
 \section*{E2. Linear Gaussian Models}
 
 \subsection*{2.1.}
@@ -254,8 +305,6 @@ I guess we may say the first two principle components perform pretty well on \il
 \end{figure}
 
 This is something rather expected as we have 7 output labels (in fact, 6 output labels as we have no \ilc{Type 4}), but only 2 dimensions to project the clustering. The performance is further limited due to the unbalanced nature of having significantly more \ilc{Type 1} and \ilc{Type 2} samples, granting \ilc{Type 1\&2} glasses to display more features that are potentially similar to other types of glasses (just like doing multiple testing).
-
-
 
 
 
