@@ -181,7 +181,7 @@ I don't know if we are expected to show the proof, but here's a trick that can d
     &\text{Now to deduce $E(y \mid x)$} \\
     \Rightarrow &\begin{cases}
         E(z | x) &= E(z) = E(y + Ax) = \mu_y + A \mu_x = \mu_y -\Sigma_{yx} \Sigma_{xx}^{-1} \mu_x \\
-        E(z | x) &= E(y + Ax \mid x) = E(y \mid x) + A E(x \mid x)
+        E(z | x) &= E(y + Ax \mid x) = E(y \mid x) + A E(x \mid x) \\
     \end{cases} \\
     \Longrightarrow E(y \mid x) &= E(z | x) - A E(x \mid x) = \mu_y -\Sigma_{yx} \Sigma_{xx}^{-1} \mu_x - (-\Sigma_{yx} \Sigma_{xx}^{-1}) x \\
     &= \mu_y + \Sigma_{yx} \Sigma_{xx}^{-1} (x - \mu_x) = \overline{\mu}
@@ -232,7 +232,7 @@ We may tell these two plots are close resemblance of one and another by inspecti
 
 Please refer to \ilc{code/p2.py} for the code implementation.
 
-\section*{E3. Dimensionality Reduction and PCA}
+\section*{E3. dimensionality Reduction and PCA}
 
 \subsection*{3.1.}
 
@@ -311,11 +311,128 @@ This is something rather expected as we have 7 output labels (in fact, 6 output 
 
 \section*{E4. Gaussian Mixture Models }
 
-\section*{Exploration}
+\section*{Exploration: t-SNE}
+
+\subsection*{Motivation}
 
 % https://www.youtube.com/watch?v=NEaUSP4YerM
 % https://medium.com/@violante.andre/an-introduction-to-t-sne-with-python-example-47e6ae7dc58f
 
+There are many dimensionality reduction algorithms, as we have learned in this class, PCA is a dimensionality reduction algorithm that works fairly well on linear datasets and it is known to be used in combination with distance-based clustering algorithms. Intuitively, this makes PCA unapplicable of capturing dataset with non-linear structure -- such as a manifold ``Swiss roll'' we showed in class.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\linewidth]{{fig/exp_swiss_roll}.png}
+\end{figure}
+
+Well there are certainly PCA-based algorithms that are designed to handle this problem, e.g., the various avalivable and kernel PCAs, the SNEs and t-SNE in particular attracted my attention as it is a dimensionality reduction algorithm that doesn't wotk with distance-based clustering algorithms, yet yields promising results (\href{https://stats.stackexchange.com/questions/340175/why-is-t-sne-not-used-as-a-dimensionality-reduction-technique-for-clustering-or}{ref.}):
+
+
+
+\begin{figure}[H]
+\minipage{0.5\textwidth}
+  \includegraphics[width=\linewidth]{{fig/exp_pca_minist}.png}
+\endminipage\hfill
+\minipage{0.5\textwidth}
+    \includegraphics[width=\linewidth]{{fig/exp_tsne_minist}.png}
+\endminipage
+\end{figure}
+
+Clearly the t-SNE algorithms shows better clusters in comparison to PCA. So in this exploration I will give a brief walk-through on how t-SNE works, run it on the same dataset I used in \textbf{Exercise 3} and interpret the result, then discuss about the advantages between t-SNE and PCA in terms of determinability, locality, usability in combination with clustering algorithms, computational costs, etc.\newline
+
+\subsection*{Mechanism of t-SNE}
+
+As we already familiar from learning PCA, any direct projection of high-dimensional datapoints to lower dimensions will likely result in a mishmash:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\linewidth]{{fig/exp_direct_pj}.png}
+\end{figure}
+
+Intuitively, we would like to move around these projected datapoints, so that there can be a distinguishiable distance between different labels. However, the question is how? Which point should we move? And in which direction? Assume we have the following raw projection of two dimensional data onto one line:
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{{fig/exp_tsne_raw}.png}
+\end{figure}
+
+t-SNE runs in an iterative manner, as it will move one point at a time untill it reaches the stopping criteria (which is usually numbers of iterations). W.L.O.G., let's check out how will t-SNE move the \textcolor{red}{leftmost red} point:
+
+\begin{enumerate}
+    \item First t-SNE will datapoints which is similar to this \textcolor{red}{leftmost red}, which are other \textcolor{red}{red} datapoints.
+    \item So naturally, we should move this \textcolor{red}{leftmost red} datapoint closer to other \textcolor{red}{red} datapoints -- which is to its right.
+    \item Similarily, since this \textcolor{red}{leftmost red} is far away from the \textcolor{orange}{orange} and \textcolor{blue}{blue} datapoints in its original space, it will like to move away from them -- which is to its left.
+\end{enumerate}
+
+So we have the following ``tractions'':
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{{fig/exp_tsne_demo}.png}
+\end{figure}
+
+Let's assume this time the traction from the \textcolor{red}{red} points are stronger, so the \textcolor{red}{leftmost red} moves to its right for a bit. Then we do this evaluation to each and every points, over and over, untill the stopping criteria is reached, and we may have some nice clusters on this one dimensionl line.\newline
+
+So how does t-SNE determine the similarity between datapoints? It does it, again, in an iterative manner. t-SNE will locate a point first (in this case, it will be the \textbf{black}{black} point from the \textbf{blue}{blue} cluster), and model its relative distances to all other datapoints under a normal distribution curve. So datapoints with same or similar lable, will have a higher probablity score, as it is closer to the center of the normal curve; yet datapoints that is vast unlike to eachother will have a lower probablity score, as it will be at the tails of normal curve.
+
+\begin{figure}[H]
+\minipage{0.3\textwidth}
+  \includegraphics[width=\linewidth]{{fig/exp_tsne_step1.1}.png}
+\endminipage\hfill
+\minipage{0.3\textwidth}
+  \includegraphics[width=\linewidth]{{fig/exp_tsne_step1.2}.png}
+\endminipage\hfill
+\minipage{0.3\textwidth}
+    \includegraphics[width=\linewidth]{{fig/exp_tsne_step1.3}.png}
+\endminipage
+\end{figure}
+
+t-SNE will then ``scale'' these probablity scores to unsure the total probably will be added to 1. In other words, assume datapoint $A$ has relative probablity scores of $p(A_x), p(A_y), \dots p(A_n)$ to datapoint $X, Y, \dots, N$, we will have $p(A_i') = \frac{p(A_i)}{\sum\limits_{j}^{n} p(A_j)}$. Following this procedure, t-SNE will obtain the relative normalized probablity score between every two datapoints, and thus fill this similarity matrix (note that it is common that $p(A_b') \neq p(B_a')$ as datapoints $A, B$ are under two different normal distributions. So t-SNE simple take the average out of these two) -- and the end result will be the rightmost matrix above; where \textcolor{red}{red entries} represent higher similarity.\newline
+
+Now we repeat such matrix filling operation with respect to the one-dimensional line, as we will fill in another matrix where the noralized probablity score will be determined by the relative distance between one point to another on this one-dimensional line. However, instead of modeling its with normal distribution, it will use t-distribution (and therefore, the ``t'' of ``t-SNE'') -- this is because t-distribution curve has a lower center and higher tails in comparison to normal distribution, thus encourges more seperation of datapoints.
+
+
+\begin{figure}[H]
+\minipage{0.7\textwidth}
+  \includegraphics[width=\linewidth]{{fig/exp_tsne_step2.1}.png}
+\endminipage\hfill
+\minipage{0.3\textwidth}
+    \includegraphics[width=\linewidth]{{fig/exp_tsne_step2.2}.png}
+\endminipage
+\end{figure}
+
+With the two similarity matrices, t-SNE may then try to ``convert'' the second matrix more like the first one -- and the steps of this conversion will determine the moving direction of each datapoints.
+
+\subsection*{t-SNE on UCI ML Glass Classification Dataset}
+
+I have implemented t-SNE on the UCI ML Glass Classification Dataset I used in \textbf{Exercise 3} and got the following result:
+
+\begin{figure}[H]
+\minipage{0.5\textwidth}
+  \includegraphics[width=\linewidth]{{fig/e3.4_1}.png}
+  \caption*{PCA}
+\endminipage\hfill
+\minipage{0.5\textwidth}
+    \includegraphics[width=\linewidth]{{fig/exp_glass}.png}
+    \caption*{t-SNE}
+\endminipage
+\end{figure}
+
+Although we don't have a clean clustered result like t-SNE on \ilc{MINIST} did. It is observable that we have better clustering result as the \ilc{Type 5, Type 6, Type 7} glasses are better gathered. Although we still can't effectively distinguish \ilc{Type 1} from \ilc{Type 2} glasses, they are certainly more scattered.
+
+(please refer to \ilc{A4/code/exploration} for code implementation.)
+
+\subsection*{t-SNE vs PCA}
+
+Although t-SNE offers better clustering visualization on many popular tasks, it also has its pros and cons. The main pros, are that t-SNE can certainly able to capture manifold structure, and it is better on visualization due to the procedure of t-SNE encourages different datapoints to ``move away from eachother,'' where PCA only cares about the maximum of sum of squared variance.\newline
+
+t-SNE also has many cons, and one of the most significant one is probably its incompability with distanced-based clustering algorithms. As we are directly moving the datapoints around in a lower-dimensional space, these datapoints lose their original distance relationship and thus become incapable of being a direct feed of distance-based clustering algorithms. Also on this note, t-SNE is not capable of learning a high-dimensional space to a lower-dimensions, but rather just lower the dimensions of known data -- so if an unseen data joins, it can't directly project it onto a lower-dimensionl space.\newline
+
+Further t-SNE is a non-determistic algorithm as it has a turnable paramater \textit{perplexity}, which is a loose balancer between the local and global aspect of given data, so you might have to run multiple trials to achive the optimal result. This is especially a problem as t-SNE is a lot more computational intense than PCA due to 1) it has to calculate the similarity scores that is proporsional to the combinations of datapoints, but not simply project all datapoints on to a line; 2) it has to do it iteraively over and over.
+
+The effect of this parameter is complicate, but according to \href{https://distill.pub/2016/misread-tsne/}{many articles} it works best if it is a rough estimation of cluster size. This implies t-SNE is probably not so suitable to unbalanced dataset (like the UCI ML Glass Classification I used). PCA, on the other hand, is parameter-free, but I don't consider this to be such a major advantage as the countless kernel PCA algorithms has much more turnable parameters.\newline
+
+A more through discussion between t-SNE and PCA can be found \href{https://stats.stackexchange.com/questions/238538/are-there-cases-where-pca-is-more-suitable-than-t-sne}{here} and \href{https://stats.stackexchange.com/questions/263539/clustering-on-the-output-of-t-sne}{here}.
 
 \end{document}
 
