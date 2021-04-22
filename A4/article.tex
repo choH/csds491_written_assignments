@@ -313,6 +313,193 @@ This is something rather expected as we have 7 output labels (in fact, 6 output 
 
 \section*{E4. Gaussian Mixture Models }
 
+Please refer to \ilc{A4/code/e4.py} for code implementation. Note the plotting is refered to \href{https://matplotlib.org/3.2.2/gallery/statistics/confidence_ellipse.html#sphx-glr-gallery-statistics-confidence-ellipse-py}{this}, and the GMM is refered to \href{http://ethen8181.github.io/machine-learning/clustering/GMM/GMM.html#Parameter-Estimation}{this} tutorials.
+
+\subsection*{4.1}
+
+\section{4.1}
+The EM algorithm iteratively performs the \ilc{expectation} step and \ilc{maximization} step -- thus ``EM'' -- until the log-likelihood (the indicator of convergence) falls into an acceptable \ilc{thlr}.
+
+
+\subsection*{Expectation Step}
+
+The expectation step intends to solve the inference problem: which Gaussian distribution generated each of the data point?
+By applying Baye's rule, the conditional probability of giving a data point $z_i = m$ given $z_i \in N_k$ can be represented as:
+\begin{align*}
+    \gamma_k = p(z_i=m|N_k) &= \frac{p(z_i=k)p(N_k|z_i=m)}{p(N_k)} \\
+    &= \frac{p(z_i=k)p(N_k|z_i=m)}{\sum_{j=1}^Kp(z_i=j)p(N_k|z_i=j)} \\
+    &= \frac{\pi_k\mathcal N(N_k|\mu_k, \Sigma_k)}{\sum_{j=1}^K \mathcal N(N_k|\mu_j, \Sigma_j)}
+\end{align*}
+Based on the parameters $\gamma_k$, $\pi_k$, $\mu_k$, and $\Sigma_k$, we are able to compute the log-likelihood for the purpose of optimization:
+\begin{align*}
+    \sum_k\sum_i \gamma_k^{(i)}log(\pi_k) + \sum_k\sum_i \gamma_{k}^{(i)}log(\mathcal N(N_k^{(i)|\mu_k, \Sigma_k}))
+\end{align*}
+The stopping criteria for the iteration is when the change of likelihood falls into a tolerance range that we predefined. We also need to define the
+maximum number of iterations in order to prevent it runs into infinite loop.
+
+\subsection*{Maximization Step}
+
+Since the change of the membership of data points will also affect the distributions, we can derive a closed form updates for all the parameters (the means $\mu$, the responsibility $\pi$, and the covariance matrix $\Sigma$).
+\begin{align*}
+    \mu_k &= \frac{1}{N_k}\sum_{n=1}^{N}\gamma_k^{(n)}x^{(n)} \\
+    \Sigma_{k} &= \frac{1}{N_k}\sum_{n=1}^{N}(x^{n}-\mu_{k})(x^{n}-\mu_{k})^T \\
+    \pi_k &= \frac{N_k}{N}
+\end{align*}
+, where $N_k=\Sigma_{n=1}^{N}\gamma_{k}^{(n)}$. We will perform E-step and M-step interchangeably to optimize the classification of data points.
+
+\subsection*{4.2}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{{fig/e4.2}.png}
+\end{figure}
+
+\subsection*{4.3}
+
+\begin{figure}[H]
+\minipage{0.3\textwidth}
+  \includegraphics[width=\linewidth]{{fig/e4.3_0}.jpg}
+\endminipage\hfill
+\minipage{0.3\textwidth}
+  \includegraphics[width=\linewidth]{{fig/e4.3_1}.png}
+\endminipage\hfill
+\minipage{0.3\textwidth}
+    \includegraphics[width=\linewidth]{{fig/e4.3_2}.png}
+\endminipage
+\end{figure}
+
+We can tell that all species from the Iris dataset (on two attributes) are nicely clustered within their sigma contours.
+
+\subsection*{4.4}
+
+\subsubsection*{K = 1}
+
+\begin{figure}[H]
+\minipage{0.3\textwidth}
+  \includegraphics[width=\linewidth]{{fig/e4.4_k1_0}.png}
+\endminipage\hfill
+\minipage{0.3\textwidth}
+    \includegraphics[width=\linewidth]{{fig/e4.4_k1_5}.png}
+\endminipage\hfill
+\minipage{0.3\textwidth}
+    \includegraphics[width=\linewidth]{{fig/e4.4_k1_10}.png}
+\endminipage
+\end{figure}
+
+Where the $\mu, \Sigma, \pi$ for $K = 1$ are respectively:
+\begin{lstlisting}
+mean: [[ 3.48778309 70.89705882]]
+cov: [[[  1.29793889  13.92641885]
+  [ 13.92641885 184.14381488]]]
+pi: [1.]
+
+mean: [[ 3.48778309 70.89705882]]
+cov: [[[  1.29793889  13.92641885]
+  [ 13.92641885 184.14381488]]]
+pi: [1.]
+
+mean: [[ 3.48778309 70.89705882]]
+cov: [[[  1.29793889  13.92641885]
+  [ 13.92641885 184.14381488]]]
+pi: [1.]
+\end{lstlisting}
+
+
+
+\subsubsection*{K = 2}
+
+\begin{figure}[H]
+\minipage{0.3\textwidth}
+  \includegraphics[width=\linewidth]{{fig/e4.4_k2_0}.png}
+\endminipage\hfill
+\minipage{0.3\textwidth}
+    \includegraphics[width=\linewidth]{{fig/e4.4_k2_5}.png}
+\endminipage\hfill
+\minipage{0.3\textwidth}
+    \includegraphics[width=\linewidth]{{fig/e4.4_k2_10}.png}
+\endminipage
+\end{figure}
+
+Where the $\mu, \Sigma, \pi$ for $K = 2$ are respectively:
+\begin{lstlisting}
+
+mean: [[ 4.32816932 81.43143106]
+[ 2.71366246 61.19333632]]
+cov: [[[  0.14492959   0.45361294]
+  [  0.45361294  28.18429193]]
+
+[[  1.11020876  10.67014897]
+  [ 10.67014897 131.42085961]]]
+pi: [0.47947807 0.52052193]
+
+mean: [[ 4.32816932 81.43143106]
+[ 2.71366246 61.19333632]]
+cov: [[[  0.14492959   0.45361294]
+  [  0.45361294  28.18429193]]
+[[  1.11020876  10.67014897]
+  [ 10.67014897 131.42085961]]]
+pi: [0.47947807 0.52052193]
+
+mean: [[ 4.32816932 81.43143106]
+[ 2.71366246 61.19333632]]
+cov: [[[  0.14492959   0.45361294]
+  [  0.45361294  28.18429193]]
+
+[[  1.11020876  10.67014897]
+  [ 10.67014897 131.42085961]]]
+pi: [0.47947807 0.52052193]
+\end{lstlisting}
+
+
+\subsubsection*{K = 3}
+
+\begin{figure}[H]
+\minipage{0.3\textwidth}
+  \includegraphics[width=\linewidth]{{fig/e4.4_k3_0}.png}
+\endminipage\hfill
+\minipage{0.3\textwidth}
+    \includegraphics[width=\linewidth]{{fig/e4.4_k3_5}.png}
+\endminipage\hfill
+\minipage{0.3\textwidth}
+    \includegraphics[width=\linewidth]{{fig/e4.4_k3_10}.png}
+\endminipage
+\end{figure}
+Where the $\mu, \Sigma, \pi$ for $K = 3$ are respectively:
+\begin{lstlisting}
+
+mean: [[ 4.23203926 83.42947492]
+[ 2.08519156 55.01970556]
+[ 4.34563196 78.61168712]]
+cov: [[[ 0.1506054   0.52994426]
+  [ 0.52994426 25.80940221]]
+[[ 0.13317075  1.1482405 ]
+  [ 1.1482405  41.28312871]]
+[[ 0.1526638   1.03335337]
+  [ 1.03335337 30.27117787]]]
+pi: [0.20632691 0.36913676 0.42453633]
+
+mean: [[ 4.23203926 83.42947492]
+[ 2.08519156 55.01970556]
+[ 4.34563196 78.61168712]]
+cov: [[[ 0.1506054   0.52994426]
+  [ 0.52994426 25.80940221]]
+[[ 0.13317075  1.1482405 ]
+  [ 1.1482405  41.28312871]]
+[[ 0.1526638   1.03335337]
+  [ 1.03335337 30.27117787]]]
+pi: [0.20632691 0.36913676 0.42453633]
+
+mean: [[ 4.23203926 83.42947492]
+[ 2.08519156 55.01970556]
+[ 4.34563196 78.61168712]]
+cov: [[[ 0.1506054   0.52994426]
+  [ 0.52994426 25.80940221]]
+[[ 0.13317075  1.1482405 ]
+  [ 1.1482405  41.28312871]]
+[[ 0.1526638   1.03335337]
+  [ 1.03335337 30.27117787]]]
+pi: [0.20632691 0.36913676 0.42453633]
+\end{lstlisting}
+
 \section*{Exploration: t-SNE}
 
 \subsection*{Motivation}
